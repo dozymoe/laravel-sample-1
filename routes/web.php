@@ -17,3 +17,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', 'App\Http\Controllers\DashboardController@index')
         ->name('dashboard');
 });
+
+// CRUD for User
+Route::prefix('user')->group(function () {
+    Route::get('{object}/edit',
+        'App\Http\Controllers\UserController@updateForm')
+        ->middleware('can:update,object')
+        ->name('user.update');
+    Route::post('{object}/edit',
+        'App\Http\Controllers\UserController@doUpdate')
+        ->middleware('can:update,object');
+
+    Route::get('{object}/delete',
+        'App\Http\Controllers\UserController@deleteForm')
+        ->middleware('can:delete,object')
+        ->name('user.delete');
+    Route::post('{object}/delete',
+        'App\Http\Controllers\UserController@doDelete')
+        ->middleware('can:delete,object');
+});
