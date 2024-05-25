@@ -2,7 +2,7 @@
 Job Demo
 --------
 
-Paduan untuk menyiapkan sistemnya:
+A. Paduan untuk menyiapkan sistemnya:
 
 1. buat file .env dengan menyalin dari file .env.example
 2. buka file .env dan lihat bagian paling bawah, ada WWWUSER dan WWWGROUP, pastikan
@@ -10,18 +10,22 @@ Paduan untuk menyiapkan sistemnya:
    perintah :code:`id` di terminal).
 3. docker compose up
 
-Persiapan untuk database dan Laravel:
+B. Persiapan untuk database dan Laravel:
 
-1. docker compose exec --user sail laravel.test composer install
-2. docker compose exec --user sail laravel.test npm install
-3. docker compose exec --user sail laravel.test npm run build
-4. docker compose exec --user sail laravel.test php artisan migrate
-5. docker compose exec --user sail laravel.test php artisan db:seed
-6. docker compose exec --user sail laravel.test composer run-script tests
+1. docker compose stop
+2. docker compose run --no-deps laravel.test composer install
+3. docker compose up
+4. ./vendor/bin/sail npm install
+5. ./vendor/bin/sail npm run build
+6. ./vendor/bin/sail php artisan migrate
+7. ./vendor/bin/sail php artisan db:seed
+8. ./vendor/bin/sail composer run-script tests
 
-Website-nya sekarang bisa diakses di http://127.0.0.1:8080/dashboard
+C. Website-nya sekarang bisa diakses di http://127.0.0.1:8080/dashboard
 
-Daftar user yang bisa dipakai untuk login (password-nya semua adalah 'pass'):
+
+Daftar user yang bisa dipakai untuk login
+-----------------------------------------
 
 * admin@ptxyz.com
 * admin@ptxyz1.com
@@ -31,3 +35,12 @@ Daftar user yang bisa dipakai untuk login (password-nya semua adalah 'pass'):
 * supervisor1@ptxyz2.com
 * user1@ptxyz1.com
 * user1@ptxyz2.com
+
+Password-nya semua adalah 'pass'.
+
+
+Catatan penting
+---------------
+
+Langkah B.2 beda sendiri karena ketika install modul-modul lewat composer, bisa
+jadi file-file Laravel Sail akan ditimpah dengan file baru, akan ada konflik.
