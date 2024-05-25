@@ -65,6 +65,11 @@ class CompanyUserRepositoryEloquent implements CompanyUserRepository
                     $query->where('name', 'manager');
                 });
             }
+            if ($this->user->hasPermissionTo('view admins')) {
+                $query->orWhereHas('roles', function ($query) {
+                    $query->where('name', 'admin');
+                });
+            }
         });
 
         return $query;

@@ -19,10 +19,12 @@ return new class extends Migration
         $permEditSupervisors = Permission::create(['name' => 'edit supervisors']);
         $permViewManagers = Permission::create(['name' => 'view managers']);
         $permEditManagers = Permission::create(['name' => 'edit managers']);
+        $permViewAdmins = Permission::create(['name' => 'view admins']);
+        $permEditAdmins = Permission::create(['name' => 'edit admins']);
 
         $roleAdmin->syncPermissions([$permViewUsers, $permEditUsers,
             $permViewSupervisors, $permEditSupervisors, $permViewManagers,
-            $permEditManagers]);
+            $permEditManagers, $permViewAdmins, $permEditAdmins]);
         $roleManager->syncPermissions([$permViewSupervisors]);
         $roleSupervisor->syncPermissions([$permViewUsers]);
     }
@@ -40,5 +42,7 @@ return new class extends Migration
         Permission::where('name', 'edit supervisors')->delete();
         Permission::where('name', 'view managers')->delete();
         Permission::where('name', 'edit managers')->delete();
+        Permission::where('name', 'view admins')->delete();
+        Permission::where('name', 'edit admins')->delete();
     }
 };
