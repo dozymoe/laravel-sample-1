@@ -2,76 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\Company;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Symfony\Component\DomCrawler\Crawler;
+use Tests\CompanyUserTestCase;
 
-//use Symfony\Component\DomCrawler\Crawler;
-
-class UserEditTest extends TestCase
+class UserEditTest extends CompanyUserTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->companyParent = Company::factory()->create();
-        $this->companies = Company::factory()->state([
-            'parent_id' => $this->companyParent->id,
-        ])
-            ->count(2)->create();
-
-        $this->usersParent = User::factory()->state([
-            'company_id' => $this->companyParent->id,
-        ])
-            ->count(2)->create();
-        $this->usersParent[0]->assignRole('admin');
-        $this->usersParent[1]->assignRole('manager');
-
-        $this->users1 = User::factory()->state([
-            'company_id' => $this->companies[0]->id,
-        ])
-            ->count(4)->create();
-        $this->users1[0]->assignRole('admin');
-        $this->users1[1]->assignRole('supervisor');
-        foreach ($this->users1->slice(2) as $user) {
-            $user->assignRole('user');
-        }
-
-        $this->users2 = User::factory()->state([
-            'company_id' => $this->companies[1]->id,
-        ])
-            ->count(4)->create();
-        $this->users2[0]->assignRole('admin');
-        $this->users2[1]->assignRole('supervisor');
-        foreach ($this->users2->slice(2) as $user) {
-            $user->assignRole('user');
-        }
-
-        $this->supervisors = collect([$this->users1[1], $this->users2[1]]);
-    }
-
-    protected function tearDown(): void
-    {
-        foreach ($this->usersParent as $user) {
-            $user->delete();
-        }
-        foreach ($this->users1 as $user) {
-            $user->delete();
-        }
-        foreach ($this->users2 as $user) {
-            $user->delete();
-        }
-        foreach ($this->companies as $company) {
-            $company->delete();
-        }
-        $this->companyParent->delete();
-
-        parent::tearDown();
-    }
-
     /**
      * @test
      */
@@ -185,9 +120,33 @@ class UserEditTest extends TestCase
         $response = $this->actingAs($user)->get("/user/{$object->id}/edit");
         if ($expectFail) {
             $response->assertStatus(403);
+
+            return;
         } else {
             $response->assertStatus(200);
         }
+
+        $dom = new Crawler($response->content());
+
+        $inpName = $dom->filter('form.edit-user input[name="name"]');
+        $this->assertEquals(1, $inpName->count());
+        $this->assertEquals($object->name, $inpName->attr('value'));
+
+        $inpEmail = $dom->filter('form.edit-user input[name="email"]');
+        $this->assertEquals(1, $inpName->count());
+        $this->assertEquals($object->email, $inpEmail->attr('value'));
+
+        $optRole = $dom->filter(
+            'form.edit-user select[name="role"] option[selected]');
+        $this->assertEquals(1, $optRole->count());
+        $this->assertContains($optRole->attr('value'), $object->getRoleNames());
+
+        $btnSubmit = $dom->filter('form.edit-user button[type="submit"]');
+        $this->assertEquals(1, $btnSubmit->count());
+        $this->assertEquals('Update', $btnSubmit->text());
+
+        $lnkBack = $dom->filter('form.edit-user a.go-back');
+        $this->assertEquals(0, $lnkBack->count());
     }
 
     /**

@@ -7,7 +7,7 @@
     ]);
 
 @section('content')
-<form method="POST" action="">
+<form method="POST" action="" class="delete-user">
   @csrf
 
   @error('')
@@ -19,7 +19,7 @@
   <button type="submit" class="btn btn-primary">Delete</button>
 
   @if (Request::query('next'))
-    <a href="{{ Request::query('next') }}" class="btn btn-link">Back</a>
+    <a href="{{ Request::query('next') }}" class="btn btn-link go-back">Back</a>
   @endif
 </form>
 @endsection

@@ -7,7 +7,7 @@
     ]);
 
 @section('content')
-<form method="POST" action="">
+<form method="POST" action="" class="edit-user">
   @csrf
 
   @error('')
@@ -56,7 +56,7 @@
   <button type="reset" class="btn btn-secondary">Reset</button>
 
   @if (Request::query('next'))
-    <a href="{{ Request::query('next') }}" class="btn btn-link">Back</a>
+    <a href="{{ Request::query('next') }}" class="btn btn-link go-back">Back</a>
   @endif
 </form>
 @endsection
