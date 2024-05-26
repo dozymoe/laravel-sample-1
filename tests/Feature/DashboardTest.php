@@ -8,8 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\TestCase;
 
-//use Spatie\Permission\Models\Role;
-
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
@@ -74,8 +72,16 @@ class DashboardTest extends TestCase
     }
 
     /**
-     * A basic feature test example.
-     *
+     * @test
+     */
+    public function anon_visit_dashboard(): void
+    {
+        $response = $this->get('/dashboard');
+        $response->assertStatus(302);
+        $response->assertRedirectToRoute('login');
+    }
+
+    /**
      * @test
      */
     public function admin_parent_company_visit_dashboard(): void
@@ -117,7 +123,7 @@ class DashboardTest extends TestCase
     public function user_company_visit_dashboard(): void
     {
         // company1 user
-        $this->normaluser_visit_dashboard($this->users1[2]);
+        $this->user_visit_dashboard($this->users1[2]);
     }
 
     /**
@@ -240,7 +246,7 @@ class DashboardTest extends TestCase
     /**
      * Check dashboard as user
      */
-    private function normaluser_visit_dashboard($user): void
+    private function user_visit_dashboard($user): void
     {
         $response = $this->actingAs($user)->get('/dashboard');
         $response->assertStatus(200);
