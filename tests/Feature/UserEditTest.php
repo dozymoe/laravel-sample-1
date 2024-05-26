@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\CompanyUserTestCase;
 
@@ -27,12 +28,15 @@ class UserEditTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->admin_visit_edit_user($user, $object, false);
+            $this->admin_post_edit_user($user, $object, false);
         }
         foreach ($this->users1 as $object) {
             $this->admin_visit_edit_user($user, $object, true);
+            $this->admin_post_edit_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
             $this->admin_visit_edit_user($user, $object, true);
+            $this->admin_post_edit_user($user, $object, true);
         }
     }
 
@@ -46,12 +50,15 @@ class UserEditTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->manager_visit_edit_user($user, $object, true);
+            $this->manager_post_edit_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
             $this->manager_visit_edit_user($user, $object, true);
+            $this->manager_post_edit_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
             $this->manager_visit_edit_user($user, $object, true);
+            $this->manager_post_edit_user($user, $object, true);
         }
     }
 
@@ -65,12 +72,15 @@ class UserEditTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->admin_visit_edit_user($user, $object, true);
+            $this->admin_post_edit_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
             $this->admin_visit_edit_user($user, $object, false);
+            $this->admin_post_edit_user($user, $object, false);
         }
         foreach ($this->users2 as $object) {
             $this->admin_visit_edit_user($user, $object, true);
+            $this->admin_post_edit_user($user, $object, true);
         }
     }
 
@@ -84,12 +94,15 @@ class UserEditTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->supervisor_visit_edit_user($user, $object, true);
+            $this->supervisor_post_edit_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
             $this->supervisor_visit_edit_user($user, $object, true);
+            $this->supervisor_post_edit_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
             $this->supervisor_visit_edit_user($user, $object, true);
+            $this->supervisor_post_edit_user($user, $object, true);
         }
     }
 
@@ -102,13 +115,16 @@ class UserEditTest extends CompanyUserTestCase
         $user = $this->users1[2];
 
         foreach ($this->usersParent as $object) {
-            $this->supervisor_visit_edit_user($user, $object, true);
+            $this->user_visit_edit_user($user, $object, true);
+            $this->user_post_edit_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
-            $this->supervisor_visit_edit_user($user, $object, true);
+            $this->user_visit_edit_user($user, $object, true);
+            $this->user_post_edit_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
-            $this->supervisor_visit_edit_user($user, $object, true);
+            $this->user_visit_edit_user($user, $object, true);
+            $this->user_post_edit_user($user, $object, true);
         }
     }
 
@@ -150,11 +166,48 @@ class UserEditTest extends CompanyUserTestCase
     }
 
     /**
+     * Check edit user as admin
+     */
+    private function admin_post_edit_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/edit",
+            [
+                'name' => 'Hallo',
+                'email' => $object->email,
+                'role' => $object->getRoleNames()[0],
+            ]);
+        if ($expectFail) {
+            $response->assertStatus(403);
+
+            return;
+        } else {
+            $response->assertRedirectToRoute('dashboard');
+        }
+
+        $storedObject = User::where('id', $object->id)->first();
+        $this->assertEquals('Hallo', $storedObject->name);
+    }
+
+    /**
      * Check edit user as manager
      */
     private function manager_visit_edit_user($user, $object, $expectFail): void
     {
         $response = $this->actingAs($user)->get("/user/{$object->id}/edit");
+        if ($expectFail) {
+            $response->assertStatus(403);
+        } else {
+            $response->assertStatus(200);
+        }
+    }
+
+    /**
+     * Check edit user as manager
+     */
+    private function manager_post_edit_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/edit",
+            ['name' => 'Hallo']);
         if ($expectFail) {
             $response->assertStatus(403);
         } else {
@@ -176,11 +229,39 @@ class UserEditTest extends CompanyUserTestCase
     }
 
     /**
+     * Check edit user as supervisor
+     */
+    private function supervisor_post_edit_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/edit",
+            ['name' => 'Hallo']);
+        if ($expectFail) {
+            $response->assertStatus(403);
+        } else {
+            $response->assertStatus(200);
+        }
+    }
+
+    /**
      * Check edit user as user
      */
     private function user_visit_edit_user($user, $object, $expectFail): void
     {
         $response = $this->actingAs($user)->get("/user/{$object->id}/edit");
+        if ($expectFail) {
+            $response->assertStatus(403);
+        } else {
+            $response->assertStatus(200);
+        }
+    }
+
+    /**
+     * Check edit user as user
+     */
+    private function user_post_edit_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/edit",
+            ['name' => 'Hallo']);
         if ($expectFail) {
             $response->assertStatus(403);
         } else {

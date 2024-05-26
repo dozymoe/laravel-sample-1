@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\CompanyUserTestCase;
 
@@ -46,12 +47,15 @@ class UserDeleteTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->manager_visit_delete_user($user, $object, true);
+            $this->manager_post_delete_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
             $this->manager_visit_delete_user($user, $object, true);
+            $this->manager_post_delete_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
             $this->manager_visit_delete_user($user, $object, true);
+            $this->manager_post_delete_user($user, $object, true);
         }
     }
 
@@ -65,12 +69,14 @@ class UserDeleteTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->admin_visit_delete_user($user, $object, true);
+            $this->admin_post_delete_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
             $this->admin_visit_delete_user($user, $object, false);
+            $this->admin_post_delete_user($user, $object, false);
         }
         foreach ($this->users2 as $object) {
-            $this->admin_visit_delete_user($user, $object, true);
+            $this->admin_post_delete_user($user, $object, true);
         }
     }
 
@@ -84,12 +90,15 @@ class UserDeleteTest extends CompanyUserTestCase
 
         foreach ($this->usersParent as $object) {
             $this->supervisor_visit_delete_user($user, $object, true);
+            $this->supervisor_post_delete_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
             $this->supervisor_visit_delete_user($user, $object, true);
+            $this->supervisor_post_delete_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
             $this->supervisor_visit_delete_user($user, $object, true);
+            $this->supervisor_post_delete_user($user, $object, true);
         }
     }
 
@@ -102,13 +111,16 @@ class UserDeleteTest extends CompanyUserTestCase
         $user = $this->users1[2];
 
         foreach ($this->usersParent as $object) {
-            $this->supervisor_visit_delete_user($user, $object, true);
+            $this->user_visit_delete_user($user, $object, true);
+            $this->user_post_delete_user($user, $object, true);
         }
         foreach ($this->users1 as $object) {
-            $this->supervisor_visit_delete_user($user, $object, true);
+            $this->user_visit_delete_user($user, $object, true);
+            $this->user_post_delete_user($user, $object, true);
         }
         foreach ($this->users2 as $object) {
-            $this->supervisor_visit_delete_user($user, $object, true);
+            $this->user_visit_delete_user($user, $object, true);
+            $this->user_post_delete_user($user, $object, true);
         }
     }
 
@@ -137,9 +149,40 @@ class UserDeleteTest extends CompanyUserTestCase
     }
 
     /**
+     * Check delete user as admin
+     */
+    private function admin_post_delete_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/delete");
+        if ($expectFail) {
+            $response->assertStatus(403);
+
+            return;
+        } else {
+            $response->assertRedirectToRoute('dashboard');
+        }
+
+        $storedObject = User::where('id', $object->id)->first();
+        $this->assertNull($storedObject);
+    }
+
+    /**
      * Check delete user as manager
      */
     private function manager_visit_delete_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->get("/user/{$object->id}/delete");
+        if ($expectFail) {
+            $response->assertStatus(403);
+        } else {
+            $response->assertStatus(200);
+        }
+    }
+
+    /**
+     * Check delete user as manager
+     */
+    private function manager_post_delete_user($user, $object, $expectFail): void
     {
         $response = $this->actingAs($user)->get("/user/{$object->id}/delete");
         if ($expectFail) {
@@ -163,11 +206,37 @@ class UserDeleteTest extends CompanyUserTestCase
     }
 
     /**
+     * Check delete user as supervisor
+     */
+    private function supervisor_post_delete_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/delete");
+        if ($expectFail) {
+            $response->assertStatus(403);
+        } else {
+            $response->assertStatus(200);
+        }
+    }
+
+    /**
      * Check delete user as user
      */
     private function user_visit_delete_user($user, $object, $expectFail): void
     {
         $response = $this->actingAs($user)->get("/user/{$object->id}/delete");
+        if ($expectFail) {
+            $response->assertStatus(403);
+        } else {
+            $response->assertStatus(200);
+        }
+    }
+
+    /**
+     * Check delete user as user
+     */
+    private function user_post_delete_user($user, $object, $expectFail): void
+    {
+        $response = $this->actingAs($user)->post("/user/{$object->id}/delete");
         if ($expectFail) {
             $response->assertStatus(403);
         } else {
