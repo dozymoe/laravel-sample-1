@@ -50,6 +50,8 @@ class DashboardTest extends TestCase
         foreach ($this->users2->slice(2) as $user) {
             $user->assignRole('user');
         }
+
+        $this->supervisors = collect([$this->users1[1], $this->users2[1]]);
     }
 
     protected function tearDown(): void
@@ -88,7 +90,7 @@ class DashboardTest extends TestCase
     public function manager_parent_company_visit_dashboard(): void
     {
         // parent company manager
-        $this->manager_visit_dashboard($this->usersParent[1]);
+        $this->manager_visit_dashboard($this->usersParent[1], $this->supervisors);
     }
 
     /**
@@ -130,12 +132,45 @@ class DashboardTest extends TestCase
 
         $trNodes = $dom->filter('table.table tbody tr');
         $this->assertEquals($objects->count(), $trNodes->count());
+
+        foreach ($trNodes as $row) {
+            $currentRow = new Crawler($row);
+            $firstCol = $currentRow->filter('td:nth-child(1)');
+
+            // find user in our list
+            $object = $objects->firstWhere('name', $firstCol->text());
+            $this->assertNotNull($object);
+
+            $secondCol = $currentRow->filter('td:nth-child(2)');
+            $this->assertEquals($object->company->name, $secondCol->text());
+            // must be from same company
+            $this->assertEquals($user->company->name, $secondCol->text());
+
+            $thirdCol = $currentRow->filter('td:nth-child(3)');
+            $this->assertContains(
+                $thirdCol->text(),
+                ['admin', 'manager', 'supervisor', 'user']);
+
+            $fourthCol = $currentRow->filter('td:nth-child(4)');
+
+            $editLink = $fourthCol->filter('a:nth-child(1)');
+            $this->assertEquals('Edit', $editLink->text());
+            $this->assertStringStartsWith(
+                route('user.update', ['object' => $object]),
+                $editLink->attr('href'));
+
+            $deleteLink = $fourthCol->filter('a:nth-child(2)');
+            $this->assertEquals('Delete', $deleteLink->text());
+            $this->assertStringStartsWith(
+                route('user.delete', ['object' => $object]),
+                $deleteLink->attr('href'));
+        }
     }
 
     /**
      * Check dashboard as manager
      */
-    private function manager_visit_dashboard($user): void
+    private function manager_visit_dashboard($user, $objects): void
     {
         $response = $this->actingAs($user)->get('/dashboard');
         $response->assertStatus(200);
@@ -143,7 +178,27 @@ class DashboardTest extends TestCase
         $dom = new Crawler($response->content());
 
         $trNodes = $dom->filter('table.table tbody tr');
-        $this->assertEquals(2, $trNodes->count());
+        $this->assertEquals($objects->count(), $trNodes->count());
+
+        foreach ($trNodes as $row) {
+            $currentRow = new Crawler($row);
+            $firstCol = $currentRow->filter('td:nth-child(1)');
+
+            // find user in our list
+            $object = $objects->firstWhere('name', $firstCol->text());
+            $this->assertNotNull($object);
+
+            $secondCol = $currentRow->filter('td:nth-child(2)');
+            $this->assertEquals($object->company->name, $secondCol->text());
+
+            $thirdCol = $currentRow->filter('td:nth-child(3)');
+            $this->assertContains(
+                $thirdCol->text(),
+                ['supervisor']);
+
+            $fourthCol = $currentRow->filter('td:nth-child(4)');
+            $this->assertEquals('', $fourthCol->text());
+        }
     }
 
     /**
@@ -158,6 +213,28 @@ class DashboardTest extends TestCase
 
         $trNodes = $dom->filter('table.table tbody tr');
         $this->assertEquals($objects->count() - 2, $trNodes->count());
+
+        foreach ($trNodes as $row) {
+            $currentRow = new Crawler($row);
+            $firstCol = $currentRow->filter('td:nth-child(1)');
+
+            // find user in our list
+            $object = $objects->firstWhere('name', $firstCol->text());
+            $this->assertNotNull($object);
+
+            $secondCol = $currentRow->filter('td:nth-child(2)');
+            $this->assertEquals($object->company->name, $secondCol->text());
+            // must be from same company
+            $this->assertEquals($user->company->name, $secondCol->text());
+
+            $thirdCol = $currentRow->filter('td:nth-child(3)');
+            $this->assertContains(
+                $thirdCol->text(),
+                ['user']);
+
+            $fourthCol = $currentRow->filter('td:nth-child(4)');
+            $this->assertEquals('', $fourthCol->text());
+        }
     }
 
     /**
