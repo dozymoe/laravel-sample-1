@@ -94,14 +94,19 @@ class DashboardTest extends CompanyUserTestCase
                 ['admin', 'manager', 'supervisor', 'user']);
 
             $fourthCol = $currentRow->filter('td:nth-child(4)');
+            $this->assertEquals(
+                $this->now->setTimezone(config('app.usertz'))->format('Y-m-d H:i:s'),
+                $fourthCol->text());
 
-            $editLink = $fourthCol->filter('a:nth-child(1)');
+            $fifthCol = $currentRow->filter('td:nth-child(5)');
+
+            $editLink = $fifthCol->filter('a:nth-child(1)');
             $this->assertEquals('Edit', $editLink->text());
             $this->assertStringStartsWith(
                 route('user.update', ['object' => $object]),
                 $editLink->attr('href'));
 
-            $deleteLink = $fourthCol->filter('a:nth-child(2)');
+            $deleteLink = $fifthCol->filter('a:nth-child(2)');
             $this->assertEquals('Delete', $deleteLink->text());
             $this->assertStringStartsWith(
                 route('user.delete', ['object' => $object]),
@@ -139,7 +144,12 @@ class DashboardTest extends CompanyUserTestCase
                 ['supervisor']);
 
             $fourthCol = $currentRow->filter('td:nth-child(4)');
-            $this->assertEquals('', $fourthCol->text());
+            $this->assertEquals(
+                $this->now->setTimezone(config('app.usertz'))->format('Y-m-d H:i:s'),
+                $fourthCol->text());
+
+            $fifthCol = $currentRow->filter('td:nth-child(5)');
+            $this->assertEquals('', $fifthCol->text());
         }
     }
 
@@ -175,7 +185,12 @@ class DashboardTest extends CompanyUserTestCase
                 ['user']);
 
             $fourthCol = $currentRow->filter('td:nth-child(4)');
-            $this->assertEquals('', $fourthCol->text());
+            $this->assertEquals(
+                $this->now->setTimezone(config('app.usertz'))->format('Y-m-d H:i:s'),
+                $fourthCol->text());
+
+            $fifthCol = $currentRow->filter('td:nth-child(5)');
+            $this->assertEquals('', $fifthCol->text());
         }
     }
 

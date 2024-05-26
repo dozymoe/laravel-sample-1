@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Datetime;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -25,6 +26,7 @@ class UserSeeder extends Seeder
             ['supervisor']);
         $roleUserId = DB::scalar('select id from roles where name=?',
             ['user']);
+        $now = new Datetime;
 
         $values = [];
         foreach ($companies as $company) {
@@ -37,6 +39,8 @@ class UserSeeder extends Seeder
                 'name' => 'Admin ' . $company->name,
                 'company_id' => $company->id,
                 'password' => $password,
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
 
             if ($company->parent_id) {
@@ -47,6 +51,8 @@ class UserSeeder extends Seeder
                         'name' => 'Supervisor' . $ii . ' ' . $company->name,
                         'company_id' => $company->id,
                         'password' => $password,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
                 }
                 for ($ii = 1; $ii < 50; $ii++) {
@@ -55,6 +61,8 @@ class UserSeeder extends Seeder
                         'name' => 'User' . $ii . ' ' . $company->name,
                         'company_id' => $company->id,
                         'password' => $password,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
                 }
             } else {
@@ -65,6 +73,8 @@ class UserSeeder extends Seeder
                         'name' => 'Manager' . $ii . ' ' . $company->name,
                         'company_id' => $company->id,
                         'password' => $password,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
                 }
             }

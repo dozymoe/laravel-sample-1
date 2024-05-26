@@ -13,6 +13,7 @@
       <th>Name</th>
       <th>Company</th>
       <th>Role</th>
+      <th>Created At</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -22,6 +23,7 @@
       <td>{{ $user->name }}</td>
       <td>{{ $user->company->name }}</td>
       <td>{{ $user->getRolenames()->implode(', ') }}</td>
+      <td>{{ MyDate::format($user->created_at) }}</td>
       <td>
         @can('update', $user)
         <a href="{{ route('user.update', ['object' => $user, 'next' => url()->full()]) }}"

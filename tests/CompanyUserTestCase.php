@@ -4,12 +4,14 @@ namespace Tests;
 
 use App\Models\Company;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CompanyUserTestCase extends TestCase
 {
     use RefreshDatabase;
 
+    protected $now;
     protected $companyParent;
     protected $companies;
     protected $usersParent;
@@ -21,14 +23,20 @@ class CompanyUserTestCase extends TestCase
     {
         parent::setUp();
 
+        $this->now = Carbon::now();
+
         $this->companyParent = Company::factory()->create();
         $this->companies = Company::factory()->state([
             'parent_id' => $this->companyParent->id,
+            'created_at' => $this->now,
+            'updated_at' => $this->now,
         ])
             ->count(2)->create();
 
         $this->usersParent = User::factory()->state([
             'company_id' => $this->companyParent->id,
+            'created_at' => $this->now,
+            'updated_at' => $this->now,
         ])
             ->count(2)->create();
         $this->usersParent[0]->assignRole('admin');
@@ -36,6 +44,8 @@ class CompanyUserTestCase extends TestCase
 
         $this->users1 = User::factory()->state([
             'company_id' => $this->companies[0]->id,
+            'created_at' => $this->now,
+            'updated_at' => $this->now,
         ])
             ->count(4)->create();
         $this->users1[0]->assignRole('admin');
@@ -46,6 +56,8 @@ class CompanyUserTestCase extends TestCase
 
         $this->users2 = User::factory()->state([
             'company_id' => $this->companies[1]->id,
+            'created_at' => $this->now,
+            'updated_at' => $this->now,
         ])
             ->count(4)->create();
         $this->users2[0]->assignRole('admin');
